@@ -31,9 +31,9 @@ func NewPostgresProductRepository(db *sql.DB) ProductRepository {
 
 func (r *postgresProductRepository) Create(ctx context.Context, product *entity.Product) error {
 	query := `
-		INSERT INTO products (name, description, price, created_at, updated_at)
+		INSERT INTO product_master (c_nm, c_description, d_price, ts_created_at, ts_updated_at)
 		VALUES ($1, $2, $3, $4, $5)
-		RETURNING id
+		RETURNING c_id
 	`
 	product.CreatedAt = time.Now()
 	product.UpdatedAt = time.Now()
@@ -54,9 +54,9 @@ func (r *postgresProductRepository) Create(ctx context.Context, product *entity.
 
 func (r *postgresProductRepository) GetByID(ctx context.Context, id int64) (*entity.Product, error) {
 	query := `
-		SELECT id, name, description, price, created_at, updated_at
-		FROM products
-		WHERE id = $1
+		SELECT c_id, c_nm, c_description, d_price, ts_created_at, ts_updated_at
+		FROM product_master
+		WHERE c_id = $1
 	`
 	product := &entity.Product{}
 	err := r.db.QueryRowContext(ctx, query, id).Scan(
@@ -79,9 +79,9 @@ func (r *postgresProductRepository) GetByID(ctx context.Context, id int64) (*ent
 
 func (r *postgresProductRepository) GetAll(ctx context.Context) ([]*entity.Product, error) {
 	query := `
-		SELECT id, name, description, price, created_at, updated_at
-		FROM products
-		ORDER BY id ASC
+		SELECT c_id, c_nm, c_description, d_price, ts_created_at, ts_updated_at
+		FROM product_master
+		ORDER BY c_id ASC
 	`
 	rows, err := r.db.QueryContext(ctx, query)
 	if err != nil {
@@ -109,9 +109,9 @@ func (r *postgresProductRepository) GetAll(ctx context.Context) ([]*entity.Produ
 
 func (r *postgresProductRepository) Update(ctx context.Context, product *entity.Product) error {
 	query := `
-		UPDATE products
-		SET name = $1, description = $2, price = $3, updated_at = $4
-		WHERE id = $5
+		UPDATE product_master
+		SET c_nm = $1, c_description = $2, d_price = $3, ts_updated_at = $4
+		WHERE c_id = $5
 	`
 	product.UpdatedAt = time.Now()
 	res, err := r.db.ExecContext(ctx, query,
@@ -133,7 +133,7 @@ func (r *postgresProductRepository) Update(ctx context.Context, product *entity.
 }
 
 func (r *postgresProductRepository) Delete(ctx context.Context, id int64) error {
-	query := `DELETE FROM products WHERE id = $1`
+	query := `DELETE FROM product_master WHERE c_id = $1`
 	res, err := r.db.ExecContext(ctx, query, id)
 	if err != nil {
 		return fmt.Errorf("failed to delete product: %w", err)
