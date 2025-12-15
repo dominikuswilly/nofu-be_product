@@ -1,0 +1,23 @@
+# Binaries
+bin/
+main
+
+# Logs
+*.log
+
+# Environment variables
+.env
+
+# Go dependencies
+go.sum
+vendor/
+
+# Docker
+docker-compose.override.yml
+
+# IDEs
+.idea/
+.vscode/
+
+# Build artifacts
+nofu-be_product
