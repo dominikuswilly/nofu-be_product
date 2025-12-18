@@ -42,20 +42,6 @@ func main() {
 		logger.Fatal("Failed to ping database", zap.Error(err))
 	}
 
-	// Create table if not exists (Simple migration for now)
-	createTableSQL := `
-	CREATE TABLE IF NOT EXISTS products (
-		id SERIAL PRIMARY KEY,
-		name VARCHAR(255) NOT NULL,
-		description TEXT,
-		price DECIMAL(10, 2) NOT NULL,
-		created_at TIMESTAMP NOT NULL,
-		updated_at TIMESTAMP NOT NULL
-	);`
-	if _, err := db.Exec(createTableSQL); err != nil {
-		logger.Fatal("Failed to run migration", zap.Error(err))
-	}
-
 	// 4. Layers Setup
 	repo := repository.NewPostgresProductRepository(db)
 	uc := usecase.NewProductUsecase(repo)
