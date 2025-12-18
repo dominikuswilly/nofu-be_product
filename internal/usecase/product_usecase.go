@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"time"
 
 	"github.com/dominikuswilly/nofu-be_product/internal/dto"
 	"github.com/dominikuswilly/nofu-be_product/internal/entity"
@@ -31,6 +32,10 @@ func (u *productUsecase) CreateProduct(ctx context.Context, req dto.CreateProduc
 		Name:        req.Name,
 		Description: req.Description,
 		Price:       req.Price,
+		Currency:    req.Currency,
+		Url:         req.Url,
+		CreatedBy:   "orang",
+		CreatedAt:   time.Now(),
 	}
 
 	if err := u.repo.Create(ctx, product); err != nil {

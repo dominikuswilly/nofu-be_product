@@ -31,19 +31,18 @@ func NewPostgresProductRepository(db *sql.DB) ProductRepository {
 
 func (r *postgresProductRepository) Create(ctx context.Context, product *entity.Product) error {
 	query := `
-		INSERT INTO product_master (c_nm, c_description, d_price, ts_created_at, ts_updated_at)
-		VALUES ($1, $2, $3, $4, $5)
+		INSERT INTO product_master (c_nm, c_description, d_price, c_currency, c_url, c_created_by)
+		VALUES ($1, $2, $3, $4, $5, $6)
 		RETURNING c_id
 	`
-	product.CreatedAt = time.Now()
-	product.UpdatedAt = time.Now()
 
 	err := r.db.QueryRowContext(ctx, query,
 		product.Name,
 		product.Description,
 		product.Price,
-		product.CreatedAt,
-		product.UpdatedAt,
+		product.Currency,
+		product.Url,
+		product.CreatedBy,
 	).Scan(&product.ID)
 
 	if err != nil {

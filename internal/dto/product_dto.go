@@ -7,6 +7,8 @@ type CreateProductRequest struct {
 	Name        string  `json:"name" binding:"required,min=3"`
 	Description string  `json:"description"`
 	Price       float64 `json:"price" binding:"required,gt=0"`
+	Currency    string  `json:"currency" binding:"required"`
+	Url         string  `json:"url" binding:"required"`
 }
 
 // UpdateProductRequest is the partial product data for updates
