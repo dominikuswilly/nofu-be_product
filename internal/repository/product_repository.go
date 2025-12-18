@@ -53,18 +53,23 @@ func (r *postgresProductRepository) Create(ctx context.Context, product *entity.
 
 func (r *postgresProductRepository) GetByID(ctx context.Context, id int64) (*entity.Product, error) {
 	query := `
-		SELECT c_id, c_nm, c_description, d_price, ts_created_at, ts_updated_at
+		SELECT c_id, c_nm, c_description, d_price, c_currency, c_url, c_created_by, ts_created_at, ts_updated_at
 		FROM product_master
 		WHERE c_id = $1
 	`
 	product := &entity.Product{}
+	var createdAt, updatedAt sql.NullTime
+	// var createdBy sql.NullString // Removed, scanning directly into product.CreatedBy
 	err := r.db.QueryRowContext(ctx, query, id).Scan(
 		&product.ID,
 		&product.Name,
 		&product.Description,
 		&product.Price,
-		&product.CreatedAt,
-		&product.UpdatedAt,
+		&product.Currency,
+		&product.Url,
+		&product.CreatedBy, // Scan directly into *string
+		&createdAt,
+		&updatedAt,
 	)
 
 	if err == sql.ErrNoRows {
@@ -73,12 +78,20 @@ func (r *postgresProductRepository) GetByID(ctx context.Context, id int64) (*ent
 	if err != nil {
 		return nil, fmt.Errorf("failed to get product by id: %w", err)
 	}
+
+	// product.CreatedBy = createdBy.String // Removed
+	if createdAt.Valid {
+		product.CreatedAt = createdAt.Time
+	}
+	if updatedAt.Valid {
+		product.UpdatedAt = updatedAt.Time
+	}
 	return product, nil
 }
 
 func (r *postgresProductRepository) GetAll(ctx context.Context) ([]*entity.Product, error) {
 	query := `
-		SELECT c_id, c_nm, c_description, d_price, ts_created_at, ts_updated_at
+		SELECT c_id, c_nm, c_description, d_price, c_currency, c_url, c_created_by, ts_created_at, ts_updated_at
 		FROM product_master
 		ORDER BY c_id ASC
 	`
@@ -91,15 +104,27 @@ func (r *postgresProductRepository) GetAll(ctx context.Context) ([]*entity.Produ
 	var products []*entity.Product
 	for rows.Next() {
 		product := &entity.Product{}
+		var createdAt, updatedAt sql.NullTime
+		// var createdBy sql.NullString // Removed
 		if err := rows.Scan(
 			&product.ID,
 			&product.Name,
 			&product.Description,
 			&product.Price,
-			&product.CreatedAt,
-			&product.UpdatedAt,
+			&product.Currency,
+			&product.Url,
+			&product.CreatedBy, // Scan directly into *string
+			&createdAt,
+			&updatedAt,
 		); err != nil {
 			return nil, fmt.Errorf("failed to scan product: %w", err)
+		}
+		// product.CreatedBy = createdBy.String // Removed
+		if createdAt.Valid {
+			product.CreatedAt = createdAt.Time
+		}
+		if updatedAt.Valid {
+			product.UpdatedAt = updatedAt.Time
 		}
 		products = append(products, product)
 	}

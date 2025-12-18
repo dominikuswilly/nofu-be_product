@@ -28,13 +28,14 @@ func NewProductUsecase(repo repository.ProductRepository) ProductUsecase {
 }
 
 func (u *productUsecase) CreateProduct(ctx context.Context, req dto.CreateProductRequest) (*dto.ProductResponse, error) {
+	createdBy := "orang"
 	product := &entity.Product{
 		Name:        req.Name,
 		Description: req.Description,
 		Price:       req.Price,
 		Currency:    req.Currency,
 		Url:         req.Url,
-		CreatedBy:   "orang",
+		CreatedBy:   createdBy,
 		CreatedAt:   time.Now(),
 	}
 
@@ -109,5 +110,8 @@ func toProductResponse(p *entity.Product) *dto.ProductResponse {
 		Price:       p.Price,
 		CreatedAt:   p.CreatedAt,
 		UpdatedAt:   p.UpdatedAt,
+		Currency:    p.Currency,
+		Url:         p.Url,
+		CreatedBy:   p.CreatedBy,
 	}
 }
