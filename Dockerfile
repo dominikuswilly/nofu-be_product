@@ -1,24 +1,46 @@
-# Build Stage
-FROM golang:1.23-alpine AS builder
+# Build stage
+FROM golang:1.25-alpine AS builder
 
 WORKDIR /app
 
-COPY go.mod go.sum ./
+# Copy go mod files
+COPY go.mod ./
+
+# Download dependencies
 RUN go mod download
 
+# Copy source code
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o /app/bin/server ./cmd/main.go
+# Build the application with stripped binary
+RUN go build -o main -ldflags="-s -w" cmd/main.go
 
-# Runtime Stage
+# Runtime stage
 FROM alpine:latest
 
-WORKDIR /app
-
+# Install ca-certificates for HTTPS requests
 RUN apk --no-cache add ca-certificates
 
-COPY --from=builder /app/bin/server .
+# Create a non-root user
+RUN adduser -D -s /bin/sh appuser
 
+WORKDIR /home/appuser
+
+# Copy the binary from builder stage
+COPY --from=builder /app/main .
+
+# Give execute permission
+RUN chmod +x main
+
+# Switch to non-root user
+USER appuser
+
+# Health check (add this if you have a /health endpoint)
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD wget --quiet --tries=1 --spider http://localhost:8080/health || exit 1
+
+# Expose port 8080
 EXPOSE 8080
 
-CMD ["./server"]
+# Command to run the application
+CMD ["./main"]

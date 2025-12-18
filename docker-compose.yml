@@ -1,29 +1,12 @@
-version: '3.8'
-
 services:
   app:
-    build: .
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: app.netbird.cloud:8081/be-product/stable:1.0.0
+    env_file:
+      - .env
     ports:
-      - "8080:8080"
-    environment:
-      - APP_PORT=8080
-      - DB_HOST=db
-      - DB_PORT=5432
-      - DB_USER=nofu
-      - DB_PASSWORD=nofu2025
-      - DB_NAME=nofuproductdb
-    depends_on:
-      - db
-    restart: always
-
-  db:
-    image: postgres:15-alpine
-    environment:
-      - POSTGRES_USER=nofu
-      - POSTGRES_PASSWORD=nofu2025
-      - POSTGRES_DB=nofuproductdb
-    volumes:
-      - ./data/postgres:/var/lib/postgresql/data
-    ports:
-      - "5433:5432"
+      - "8091:8080"
     restart: always
