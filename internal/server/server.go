@@ -23,7 +23,7 @@ func NewServer(cfg *config.Config, handler *handler.ProductHandler, logger *zap.
 	// Logger middleware already included in Default, but we can customize if needed
 
 	// Register routes
-	api := router.Group("/api/v1")
+	api := router.Group("/api/product")
 	handler.RegisterRoutes(api)
 
 	// Health check
