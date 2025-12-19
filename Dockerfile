@@ -4,7 +4,7 @@ FROM golang:1.25-alpine AS builder
 WORKDIR /app
 
 # Copy go mod files
-COPY go.mod go.sum ./
+COPY go.mod ./
 
 # Download dependencies
 RUN go mod download
@@ -13,7 +13,6 @@ RUN go mod download
 COPY . .
 
 # Build the application with stripped binary
-# Assuming your app listens on :8091 (based on your earlier logs)
 RUN go build -o main -ldflags="-s -w" cmd/main.go
 
 # Runtime stage
@@ -36,12 +35,12 @@ RUN chmod +x main
 # Switch to non-root user
 USER appuser
 
-# Health check: make sure the app is reachable on port 8091
+# Health check (add this if you have a /health endpoint)
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD wget --quiet --tries=1 --spider http://localhost:8091/health || exit 1
+    CMD wget --quiet --tries=1 --spider http://localhost:8080/health || exit 1
 
-# ✅ Expose the port the app listens on: 8091
-EXPOSE 8091
+# Expose port 8080
+EXPOSE 8080
 
 # Command to run the application
 CMD ["./main"]
