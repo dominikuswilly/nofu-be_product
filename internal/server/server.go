@@ -6,6 +6,7 @@ import (
 
 	"github.com/dominikuswilly/nofu-be_product/internal/config"
 	"github.com/dominikuswilly/nofu-be_product/internal/handler"
+	"github.com/dominikuswilly/nofu-be_product/internal/middleware"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
@@ -20,6 +21,7 @@ func NewServer(cfg *config.Config, handler *handler.ProductHandler, logger *zap.
 
 	// Global middleware
 	router.Use(gin.Recovery())
+	router.Use(middleware.CORSMiddleware())
 	// Logger middleware already included in Default, but we can customize if needed
 
 	// Register routes
