@@ -31,8 +31,8 @@ func NewPostgresProductRepository(db *sql.DB) ProductRepository {
 
 func (r *postgresProductRepository) Create(ctx context.Context, product *entity.Product) error {
 	query := `
-		INSERT INTO product_master (c_nm, c_description, d_price, c_currency, c_url, c_created_by)
-		VALUES ($1, $2, $3, $4, $5, $6)
+		INSERT INTO product_master (c_nm, c_description, d_price, c_currency, c_url, c_created_by, i_stock)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
 		RETURNING c_id
 	`
 
@@ -43,6 +43,7 @@ func (r *postgresProductRepository) Create(ctx context.Context, product *entity.
 		product.Currency,
 		product.Url,
 		product.CreatedBy,
+		product.Stock,
 	).Scan(&product.ID)
 
 	if err != nil {
@@ -53,7 +54,7 @@ func (r *postgresProductRepository) Create(ctx context.Context, product *entity.
 
 func (r *postgresProductRepository) GetByID(ctx context.Context, id int64) (*entity.Product, error) {
 	query := `
-		SELECT c_id, c_nm, c_description, d_price, c_currency, c_url, c_created_by, ts_created_at, ts_updated_at
+		SELECT c_id, c_nm, c_description, d_price, c_currency, c_url, c_created_by, ts_created_at, ts_updated_at, i_stock
 		FROM product_master
 		WHERE c_id = $1
 	`
@@ -70,6 +71,7 @@ func (r *postgresProductRepository) GetByID(ctx context.Context, id int64) (*ent
 		&product.CreatedBy, // Scan directly into *string
 		&createdAt,
 		&updatedAt,
+		&product.Stock,
 	)
 
 	if err == sql.ErrNoRows {
@@ -91,7 +93,7 @@ func (r *postgresProductRepository) GetByID(ctx context.Context, id int64) (*ent
 
 func (r *postgresProductRepository) GetAll(ctx context.Context) ([]*entity.Product, error) {
 	query := `
-		SELECT c_id, c_nm, c_description, d_price, c_currency, c_url, c_created_by, ts_created_at, ts_updated_at
+		SELECT c_id, c_nm, c_description, d_price, c_currency, c_url, c_created_by, ts_created_at, ts_updated_at, i_stock
 		FROM product_master
 		ORDER BY c_id ASC
 	`
@@ -116,6 +118,7 @@ func (r *postgresProductRepository) GetAll(ctx context.Context) ([]*entity.Produ
 			&product.CreatedBy, // Scan directly into *string
 			&createdAt,
 			&updatedAt,
+			&product.Stock,
 		); err != nil {
 			return nil, fmt.Errorf("failed to scan product: %w", err)
 		}
@@ -134,14 +137,15 @@ func (r *postgresProductRepository) GetAll(ctx context.Context) ([]*entity.Produ
 func (r *postgresProductRepository) Update(ctx context.Context, product *entity.Product) error {
 	query := `
 		UPDATE product_master
-		SET c_nm = $1, c_description = $2, d_price = $3, ts_updated_at = $4
-		WHERE c_id = $5
+		SET c_nm = $1, c_description = $2, d_price = $3, i_stock = $4, ts_updated_at = $5
+		WHERE c_id = $6
 	`
 	product.UpdatedAt = time.Now()
 	res, err := r.db.ExecContext(ctx, query,
 		product.Name,
 		product.Description,
 		product.Price,
+		product.Stock,
 		product.UpdatedAt,
 		product.ID,
 	)
