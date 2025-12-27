@@ -2,7 +2,6 @@ package handler
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/dominikuswilly/nofu-be_product/internal/dto"
 	"github.com/dominikuswilly/nofu-be_product/internal/usecase"
@@ -63,11 +62,7 @@ func (h *ProductHandler) GetAllProducts(c *gin.Context) {
 }
 
 func (h *ProductHandler) GetProductByID(c *gin.Context) {
-	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
-		return
-	}
+	id := c.Param("id")
 
 	res, err := h.usecase.GetProductByID(c.Request.Context(), id)
 	if err != nil {
@@ -84,11 +79,7 @@ func (h *ProductHandler) GetProductByID(c *gin.Context) {
 }
 
 func (h *ProductHandler) UpdateProduct(c *gin.Context) {
-	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
-		return
-	}
+	id := c.Param("id")
 
 	var req dto.UpdateProductRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -112,13 +103,9 @@ func (h *ProductHandler) UpdateProduct(c *gin.Context) {
 }
 
 func (h *ProductHandler) DeleteProduct(c *gin.Context) {
-	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
-		return
-	}
+	id := c.Param("id")
 
-	err = h.usecase.DeleteProduct(c.Request.Context(), id)
+	err := h.usecase.DeleteProduct(c.Request.Context(), id)
 	if err != nil {
 		// Basic check for not found if repository returned specific error,
 		// but here we just assume 500 or 404 based on string match or robust error handling

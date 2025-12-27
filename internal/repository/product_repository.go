@@ -13,10 +13,10 @@ import (
 // ProductRepository defines the interface for product data access
 type ProductRepository interface {
 	Create(ctx context.Context, product *entity.Product) error
-	GetByID(ctx context.Context, id int64) (*entity.Product, error)
+	GetByID(ctx context.Context, id string) (*entity.Product, error)
 	GetAll(ctx context.Context) ([]*entity.Product, error)
 	Update(ctx context.Context, product *entity.Product) error
-	Delete(ctx context.Context, id int64) error
+	Delete(ctx context.Context, id string) error
 }
 
 // postgresProductRepository implements ProductRepository for PostgreSQL
@@ -31,12 +31,12 @@ func NewPostgresProductRepository(db *sql.DB) ProductRepository {
 
 func (r *postgresProductRepository) Create(ctx context.Context, product *entity.Product) error {
 	query := `
-		INSERT INTO product_master (c_nm, c_description, d_price, c_currency, c_url, c_created_by, i_stock)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
-		RETURNING c_id
+		INSERT INTO product_master (c_id, c_nm, c_description, d_price, c_currency, c_url, c_created_by, i_stock)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 	`
 
 	err := r.db.QueryRowContext(ctx, query,
+		product.ID,
 		product.Name,
 		product.Description,
 		product.Price,
@@ -44,7 +44,7 @@ func (r *postgresProductRepository) Create(ctx context.Context, product *entity.
 		product.Url,
 		product.CreatedBy,
 		product.Stock,
-	).Scan(&product.ID)
+	).Err()
 
 	if err != nil {
 		return fmt.Errorf("failed to create product: %w", err)
@@ -52,7 +52,7 @@ func (r *postgresProductRepository) Create(ctx context.Context, product *entity.
 	return nil
 }
 
-func (r *postgresProductRepository) GetByID(ctx context.Context, id int64) (*entity.Product, error) {
+func (r *postgresProductRepository) GetByID(ctx context.Context, id string) (*entity.Product, error) {
 	query := `
 		SELECT c_id, c_nm, c_description, d_price, c_currency, c_url, c_created_by, ts_created_at, ts_updated_at, i_stock
 		FROM product_master
@@ -160,7 +160,7 @@ func (r *postgresProductRepository) Update(ctx context.Context, product *entity.
 	return nil
 }
 
-func (r *postgresProductRepository) Delete(ctx context.Context, id int64) error {
+func (r *postgresProductRepository) Delete(ctx context.Context, id string) error {
 	query := `DELETE FROM product_master WHERE c_id = $1`
 	res, err := r.db.ExecContext(ctx, query, id)
 	if err != nil {

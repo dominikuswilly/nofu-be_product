@@ -7,15 +7,16 @@ import (
 	"github.com/dominikuswilly/nofu-be_product/internal/dto"
 	"github.com/dominikuswilly/nofu-be_product/internal/entity"
 	"github.com/dominikuswilly/nofu-be_product/internal/repository"
+	"github.com/google/uuid"
 )
 
 // ProductUsecase defines the business logic interface
 type ProductUsecase interface {
 	CreateProduct(ctx context.Context, req dto.CreateProductRequest) (*dto.ProductResponse, error)
-	GetProductByID(ctx context.Context, id int64) (*dto.ProductResponse, error)
+	GetProductByID(ctx context.Context, id string) (*dto.ProductResponse, error)
 	GetAllProducts(ctx context.Context) ([]*dto.ProductResponse, error)
-	UpdateProduct(ctx context.Context, id int64, req dto.UpdateProductRequest) (*dto.ProductResponse, error)
-	DeleteProduct(ctx context.Context, id int64) error
+	UpdateProduct(ctx context.Context, id string, req dto.UpdateProductRequest) (*dto.ProductResponse, error)
+	DeleteProduct(ctx context.Context, id string) error
 }
 
 type productUsecase struct {
@@ -28,15 +29,20 @@ func NewProductUsecase(repo repository.ProductRepository) ProductUsecase {
 }
 
 func (u *productUsecase) CreateProduct(ctx context.Context, req dto.CreateProductRequest) (*dto.ProductResponse, error) {
-
 	createdBy := "orang"
+
+	newID, err := uuid.NewV7()
+	if err != nil {
+		return nil, err
+	}
+
 	product := &entity.Product{
+		ID:          newID.String(),
 		Name:        req.Name,
 		Description: req.Description,
 		Price:       req.Price,
 		Currency:    req.Currency,
 		Url:         req.Url,
-		Stock:       req.Stock,
 		CreatedBy:   createdBy,
 		CreatedAt:   time.Now(),
 	}
@@ -48,7 +54,7 @@ func (u *productUsecase) CreateProduct(ctx context.Context, req dto.CreateProduc
 	return toProductResponse(product), nil
 }
 
-func (u *productUsecase) GetProductByID(ctx context.Context, id int64) (*dto.ProductResponse, error) {
+func (u *productUsecase) GetProductByID(ctx context.Context, id string) (*dto.ProductResponse, error) {
 	product, err := u.repo.GetByID(ctx, id)
 	if err != nil {
 		return nil, err
@@ -72,7 +78,7 @@ func (u *productUsecase) GetAllProducts(ctx context.Context) ([]*dto.ProductResp
 	return responses, nil
 }
 
-func (u *productUsecase) UpdateProduct(ctx context.Context, id int64, req dto.UpdateProductRequest) (*dto.ProductResponse, error) {
+func (u *productUsecase) UpdateProduct(ctx context.Context, id string, req dto.UpdateProductRequest) (*dto.ProductResponse, error) {
 	// First check if exists
 	existingProduct, err := u.repo.GetByID(ctx, id)
 	if err != nil {
@@ -103,7 +109,7 @@ func (u *productUsecase) UpdateProduct(ctx context.Context, id int64, req dto.Up
 	return toProductResponse(existingProduct), nil
 }
 
-func (u *productUsecase) DeleteProduct(ctx context.Context, id int64) error {
+func (u *productUsecase) DeleteProduct(ctx context.Context, id string) error {
 	return u.repo.Delete(ctx, id)
 }
 
