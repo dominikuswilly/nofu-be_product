@@ -9,7 +9,7 @@ type CreateProductRequest struct {
 	Price       float64 `json:"price" binding:"required,gt=0"`
 	Currency    string  `json:"currency" binding:"required"`
 	Url         string  `json:"url" binding:"required"`
-	Stock       int64   `json:"stock" binding:"required,min=0"`
+	Stock       *int64  `json:"stock" binding:"required,min=0"`
 }
 
 // UpdateProductRequest is the partial product data for updates

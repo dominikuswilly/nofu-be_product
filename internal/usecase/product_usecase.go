@@ -43,6 +43,7 @@ func (u *productUsecase) CreateProduct(ctx context.Context, req dto.CreateProduc
 		Price:       req.Price,
 		Currency:    req.Currency,
 		Url:         req.Url,
+		Stock:       *req.Stock,
 		CreatedBy:   createdBy,
 		CreatedAt:   time.Now(),
 	}
