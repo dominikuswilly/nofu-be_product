@@ -45,7 +45,7 @@ func main() {
 	// 4. Layers Setup
 	repo := repository.NewPostgresProductRepository(db)
 	uc := usecase.NewProductUsecase(repo)
-	h := handler.NewProductHandler(uc, logger)
+	h := handler.NewProductHandler(uc, logger, cfg.AuthServiceURL)
 
 	// 5. Server
 	srv := server.NewServer(cfg, h, logger)

@@ -4,25 +4,29 @@ import (
 	"net/http"
 
 	"github.com/dominikuswilly/nofu-be_product/internal/dto"
+	"github.com/dominikuswilly/nofu-be_product/internal/middleware"
 	"github.com/dominikuswilly/nofu-be_product/internal/usecase"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
 
 type ProductHandler struct {
-	usecase usecase.ProductUsecase
-	logger  *zap.Logger
+	usecase        usecase.ProductUsecase
+	logger         *zap.Logger
+	authServiceURL string
 }
 
-func NewProductHandler(usecase usecase.ProductUsecase, logger *zap.Logger) *ProductHandler {
+func NewProductHandler(usecase usecase.ProductUsecase, logger *zap.Logger, authServiceURL string) *ProductHandler {
 	return &ProductHandler{
-		usecase: usecase,
-		logger:  logger,
+		usecase:        usecase,
+		logger:         logger,
+		authServiceURL: authServiceURL,
 	}
 }
 
 func (h *ProductHandler) RegisterRoutes(r *gin.RouterGroup) {
 	products := r.Group("/products")
+	products.Use(middleware.AuthMiddleware(h.authServiceURL))
 	{
 		products.POST("", h.CreateProduct)
 		products.GET("", h.GetAllProducts)
