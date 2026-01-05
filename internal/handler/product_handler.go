@@ -52,7 +52,7 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, gin.H{
-		"responseCode":    "200",
+		"responseCode":    "201",
 		"responseMessage": "success",
 		"data":            res,
 	})
