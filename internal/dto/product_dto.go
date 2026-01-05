@@ -10,6 +10,7 @@ type CreateProductRequest struct {
 	Currency    string  `json:"currency" binding:"required"`
 	Url         string  `json:"url" binding:"required"`
 	Stock       *int64  `json:"stock" binding:"required,min=0"`
+	Active      *bool   `json:"active"`
 }
 
 // UpdateProductRequest is the partial product data for updates
@@ -18,6 +19,7 @@ type UpdateProductRequest struct {
 	Description *string  `json:"description,omitempty"`
 	Price       *float64 `json:"price,omitempty" binding:"omitempty,gt=0"`
 	Stock       *int64   `json:"stock,omitempty" binding:"omitempty,min=0"`
+	Active      *bool    `json:"active,omitempty"`
 }
 
 // ProductResponse is the full product data returned to clients
@@ -32,4 +34,5 @@ type ProductResponse struct {
 	Url         string    `json:"url"`
 	Currency    string    `json:"currency"`
 	Stock       int64     `json:"stock"`
+	Active      bool      `json:"active"`
 }

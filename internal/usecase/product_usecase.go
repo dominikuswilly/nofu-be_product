@@ -36,6 +36,15 @@ func (u *productUsecase) CreateProduct(ctx context.Context, req dto.CreateProduc
 		return nil, err
 	}
 
+	active := int16(1) // default value is 1
+	if req.Active != nil {
+		if *req.Active {
+			active = 1
+		} else {
+			active = 0
+		}
+	}
+
 	product := &entity.Product{
 		ID:          newID.String(),
 		Name:        req.Name,
@@ -44,6 +53,7 @@ func (u *productUsecase) CreateProduct(ctx context.Context, req dto.CreateProduc
 		Currency:    req.Currency,
 		Url:         req.Url,
 		Stock:       *req.Stock,
+		Active:      active,
 		CreatedBy:   createdBy,
 		CreatedAt:   time.Now(),
 	}
@@ -102,6 +112,13 @@ func (u *productUsecase) UpdateProduct(ctx context.Context, id string, req dto.U
 	if req.Stock != nil {
 		existingProduct.Stock = *req.Stock
 	}
+	if req.Active != nil {
+		if *req.Active {
+			existingProduct.Active = 1
+		} else {
+			existingProduct.Active = 0
+		}
+	}
 
 	if err := u.repo.Update(ctx, existingProduct); err != nil {
 		return nil, err
@@ -126,5 +143,6 @@ func toProductResponse(p *entity.Product) *dto.ProductResponse {
 		Url:         p.Url,
 		CreatedBy:   p.CreatedBy,
 		Stock:       p.Stock,
+		Active:      p.Active == 1,
 	}
 }
