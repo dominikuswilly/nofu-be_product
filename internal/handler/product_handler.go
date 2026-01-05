@@ -87,7 +87,11 @@ func (h *ProductHandler) GetProductByID(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, res)
+	c.JSON(http.StatusOK, gin.H{
+		"responseCode":    "200",
+		"responseMessage": "success",
+		"data":            res,
+	})
 }
 
 func (h *ProductHandler) UpdateProduct(c *gin.Context) {
@@ -111,7 +115,11 @@ func (h *ProductHandler) UpdateProduct(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, res)
+	c.JSON(http.StatusOK, gin.H{
+		"responseCode":    "200",
+		"responseMessage": "success",
+		"data":            res,
+	})
 }
 
 func (h *ProductHandler) DeleteProduct(c *gin.Context) {
@@ -130,5 +138,9 @@ func (h *ProductHandler) DeleteProduct(c *gin.Context) {
 		return
 	}
 
-	c.Status(http.StatusNoContent)
+	c.JSON(http.StatusNoContent, gin.H{
+		"responseCode":    "204",
+		"responseMessage": "success",
+		"data":            nil,
+	})
 }
